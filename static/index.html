@@ -74,8 +74,8 @@
   .panel-title.ledger { color: var(--amber); }
   .panel-title.match { color: var(--purple); }
 
-  .patient-name { font-size: 18px; font-weight: 700; font-family: var(--font-display); }
-  .patient-complaint { font-size: 12px; color: var(--text-muted); margin-top: 4px; }
+  .creator-name { font-size: 18px; font-weight: 700; font-family: var(--font-display); }
+  .creator-tagline { font-size: 12px; color: var(--text-muted); margin-top: 4px; }
 
   .section-label { font-size: 9px; font-weight: 700; letter-spacing: 0.12em; color: var(--text-dim); margin-bottom: 8px; margin-top: 16px; font-family: var(--font-mono); }
 
@@ -143,12 +143,12 @@
   .outcome-box.pending { border-color: #f59e0b60; background: linear-gradient(135deg, #2a1a0a, #1a1005); }
   .outcome-box.pending .outcome-status { color: var(--amber); }
 
-  /* ── Policy Panel ─────────────────────────────── */
-  .policy-section { padding: 12px; border-radius: 8px; margin-bottom: 10px; background: #111; border: 1px solid var(--border); transition: all 0.5s ease; }
-  .policy-section.matched { background: #818cf808; border-color: #818cf840; box-shadow: 0 0 15px rgba(129, 140, 248, 0.1); }
-  .policy-section-id { font-size: 10px; font-weight: 700; color: var(--purple); font-family: var(--font-mono); }
-  .policy-match-badge { font-size: 9px; padding: 2px 6px; border-radius: 3px; background: #818cf820; color: var(--purple); font-weight: 700; font-family: var(--font-mono); margin-left: 6px; }
-  .policy-text { font-size: 11.5px; color: #999; line-height: 1.55; margin-top: 6px; }
+  /* ── Requirement Panel ────────────────────────── */
+  .requirement-section { padding: 12px; border-radius: 8px; margin-bottom: 10px; background: #111; border: 1px solid var(--border); transition: all 0.5s ease; }
+  .requirement-section.matched { background: #818cf808; border-color: #818cf840; box-shadow: 0 0 15px rgba(129, 140, 248, 0.1); }
+  .requirement-section-id { font-size: 10px; font-weight: 700; color: var(--purple); font-family: var(--font-mono); }
+  .requirement-match-badge { font-size: 9px; padding: 2px 6px; border-radius: 3px; background: #818cf820; color: var(--purple); font-weight: 700; font-family: var(--font-mono); margin-left: 6px; }
+  .requirement-text { font-size: 11.5px; color: #999; line-height: 1.55; margin-top: 6px; }
 
   /* ── Scenario Switcher ────────────────────────── */
   .scenario-switch { display: flex; gap: 10px; justify-content: center; padding: 20px 0; }
@@ -210,11 +210,11 @@
     <div class="upload-row">
       <label class="upload-btn">
         📋 Upload Creator Profile (JSON)
-        <input type="file" id="ehr-upload" accept=".json">
+        <input type="file" id="creator-upload" accept=".json">
       </label>
       <label class="upload-btn">
         📄 Upload Brand Guidelines (TXT/PDF)
-        <input type="file" id="policy-upload" accept=".txt,.pdf">
+        <input type="file" id="guidelines-upload" accept=".txt,.pdf">
       </label>
     </div>
   </div>
@@ -269,7 +269,7 @@
     <!-- RIGHT: Match Agent -->
     <div class="panel" id="match-panel">
       <div class="panel-title match">⬤ MATCH AGENT — BRAND REQUIREMENTS</div>
-      <div id="match-content">
+      <div id="guidelines-content">
         <div style="color:#555; font-size:12px; font-family:var(--font-mono);">
           Waiting for Advisor Agent to write to shared ledger...
         </div>
@@ -285,9 +285,8 @@
 let currentScenario = null;
 let isProcessing = false;
 let samples = [];
-let policyText = '';
-let uploadedEHR = null;
-let uploadedPolicy = null;
+let uploadedCreator = null;
+let uploadedGuidelines = null;
 let startTime = null;
 
 const API_BASE = window.location.origin;
@@ -318,12 +317,12 @@ function renderScenarios() {
 }
 
 // ─── File Uploads ─────────────────────────────────────────────────
-document.getElementById('ehr-upload')?.addEventListener('change', async (e) => {
+document.getElementById('creator-upload')?.addEventListener('change', async (e) => {
   const file = e.target.files[0];
   if (!file) return;
   try {
     const text = await file.text();
-    uploadedEHR = JSON.parse(text);
+    uploadedCreator = JSON.parse(text);
     e.target.closest('.upload-btn').style.borderColor = 'var(--green)';
     e.target.closest('.upload-btn').style.color = 'var(--green)';
     e.target.closest('.upload-btn').textContent = `✓ ${file.name}`;
@@ -333,11 +332,11 @@ document.getElementById('ehr-upload')?.addEventListener('change', async (e) => {
   }
 });
 
-document.getElementById('policy-upload')?.addEventListener('change', async (e) => {
+document.getElementById('guidelines-upload')?.addEventListener('change', async (e) => {
   const file = e.target.files[0];
   if (!file) return;
   const text = await file.text();
-  uploadedPolicy = text;
+  uploadedGuidelines = text;
   e.target.closest('.upload-btn').style.borderColor = 'var(--green)';
   e.target.closest('.upload-btn').style.color = 'var(--green)';
   e.target.closest('.upload-btn').textContent = `✓ ${file.name}`;
@@ -345,7 +344,7 @@ document.getElementById('policy-upload')?.addEventListener('change', async (e) =
 });
 
 function checkCustomUpload() {
-  if (uploadedEHR && uploadedPolicy) {
+  if (uploadedCreator && uploadedGuidelines) {
     runCustom();
   }
 }
@@ -354,10 +353,10 @@ async function runCustom() {
   document.getElementById('landing').style.display = 'none';
   document.getElementById('main').style.display = 'block';
   
-  renderCreatorPanel(uploadedEHR);
+  renderCreatorPanel(uploadedCreator);
   startProcess({
-    creator_profile: uploadedEHR,
-    brand_guidelines: uploadedPolicy,
+    creator_profile: uploadedCreator,
+    brand_guidelines: uploadedGuidelines,
     brand_name: "Custom Brand",
     brand_id: "CUSTOM-001",
   });
@@ -372,7 +371,7 @@ async function runScenario(id) {
   const resp = await fetch(`${API_BASE}/api/scenario/${id}`);
   const data = await resp.json();
   
-  const policyData = data;
+  const guidelinesData = data;
 
   document.getElementById('landing').style.display = 'none';
   document.getElementById('main').style.display = 'block';
@@ -413,8 +412,8 @@ async function startProcess(payload) {
   document.getElementById('ledger-entries').innerHTML = '';
   document.getElementById('outcome').style.display = 'none';
   document.getElementById('outcome').innerHTML = '';
-  document.getElementById('policy-content').innerHTML = 
-    '<div style="color:#555;font-size:12px;font-family:var(--font-mono);">Waiting for Clinical Agent to write to shared ledger...</div>';
+  document.getElementById('guidelines-content').innerHTML = 
+    '<div style="color:#555;font-size:12px;font-family:var(--font-mono);">Waiting for Advisor Agent to write to shared ledger...</div>';
   
   setPhase('idle');
 
@@ -558,7 +557,7 @@ function addLedgerEntry(event) {
 }
 
 function addMatchSection(event) {
-  const container = document.getElementById('match-content');
+  const container = document.getElementById('guidelines-content');
   
   // Remove "waiting" message
   if (container.querySelector('div[style]')) {
@@ -567,15 +566,15 @@ function addMatchSection(event) {
 
   const section = document.createElement('div');
   const isFlexible = event.data?.is_flexible;
-  section.className = `policy-section ${isFlexible ? 'matched' : ''}`;
+  section.className = `requirement-section ${isFlexible ? 'matched' : ''}`;
 
   section.innerHTML = `
     <div style="display:flex;align-items:center;">
-      <span class="policy-section-id">§${escapeHtml(event.data?.section_id || '?')}</span>
-      ${isFlexible ? '<span class="policy-match-badge">FLEXIBLE</span>' : ''}
+      <span class="requirement-section-id">§${escapeHtml(event.data?.section_id || '?')}</span>
+      ${isFlexible ? '<span class="requirement-match-badge">FLEXIBLE</span>' : ''}
       ${event.data?.relevance_score ? `<span style="margin-left:auto;font-size:10px;color:var(--purple);font-family:var(--font-mono);">${Math.round(event.data.relevance_score * 100)}% match</span>` : ''}
     </div>
-    <div class="policy-text">${escapeHtml(event.data?.text_preview || event.message)}</div>
+    <div class="requirement-text">${escapeHtml(event.data?.text_preview || event.message)}</div>
   `;
   container.appendChild(section);
 }
@@ -645,8 +644,8 @@ function renderCreatorPanel(profile) {
 
   container.innerHTML = `
     <div style="margin-bottom:20px;">
-      <div class="patient-name">${escapeHtml(profile.creator_name)}</div>
-      <div class="patient-complaint">${escapeHtml(profile.creator_specialty)}</div>
+      <div class="creator-name">${escapeHtml(profile.creator_name)}</div>
+      <div class="creator-tagline">${escapeHtml(profile.creator_specialty)}</div>
     </div>
     <div class="section-label" style="margin-top:0">EXPERTISE AREAS</div>
     <div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:16px;">${expertiseHTML}</div>

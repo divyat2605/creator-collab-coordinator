@@ -113,10 +113,6 @@ creator-collab-coordinator/
 └── README.md
 ```
 
-> Note: Some filenames/classes may still carry legacy names (`policy_agent.py`, etc.) but their role in the new architecture is “Match Agent” / brand-side reasoning.
-
----
-
 ## 🔧 API Surface
 
 ### REST Endpoints

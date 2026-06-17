@@ -151,7 +151,7 @@ class CollaborationLedger:
             return self._context_cache.get(key, default)
 
     async def clear(self):
-        """Clear the ledger for a new claim."""
+        """Clear the ledger for a new collaboration run."""
         async with self._lock:
             self._entries.clear()
             self._context_cache.clear()

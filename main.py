@@ -1,11 +1,5 @@
 """
-Claims & Care Coordinator — API Server
-
-FastAPI application with:
-- SSE (Server-Sent Events) for real-time agent activity streaming
-- REST endpoints for claim processing
-- Static file serving for the frontend
-- Sample data loading
+Creator Collaboration Coordinator - API server.
 """
 
 import os
@@ -17,16 +11,13 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
-from fastapi.responses import HTMLResponse, StreamingResponse, JSONResponse
+from fastapi.responses import HTMLResponse, StreamingResponse
 
-from models.schemas import EHRData, ClaimRequest, AgentSource
-from agents.coordinator import ClaimsCoordinator
-from memory.ledger import MedicalNecessityLedger
+from models.schemas import CollaborationRequest, AgentSource
+from agents.coordinator import CampaignCoordinator
 
 
-# ── Config ──────────────────────────────────────────────────────────
-# Updated to use OpenRouter API key environment variable   
-API_KEY = os.environ.get("OPENROUTER_API_KEY", "")    
+API_KEY = os.environ.get("OPENAI_API_KEY", "")
 DATA_DIR = Path(__file__).parent / "data"
 STATIC_DIR = Path(__file__).parent / "static"
 
@@ -34,17 +25,17 @@ STATIC_DIR = Path(__file__).parent / "static"
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     if not API_KEY:
-        print("\n⚠️  WARNING: OPENROUTER_API_KEY not set!")
-        print("   Set it with: export OPENROUTER_API_KEY=your_key_here")
+        print("\nWARNING: OPENAI_API_KEY not set.")
+        print("Set it before running API requests.")
         print("   The app will still start but API calls will fail.\n")
     else:
-        print("\n✅ OPENROUTER_API_KEY detected. Agents are ready.\n")
+        print("\nOPENAI_API_KEY detected. Agents are ready.\n")
     yield
 
 
 app = FastAPI(
-    title="Claims & Care Coordinator",
-    description="Multi-agent prior authorization system with shared memory",
+    title="Creator Collaboration Coordinator",
+    description="Multi-agent brand-creator matching system with shared memory",
     version="1.0.0",
     lifespan=lifespan,
 )
@@ -58,12 +49,10 @@ app.add_middleware(
 )
 
 
-# ── Sample Data ─────────────────────────────────────────────────────
 def load_sample_creator_profile(name: str) -> dict:
     path = DATA_DIR / f"creator_profile_{name}.json"
     if not path.exists():
         raise HTTPException(404, f"Sample creator profile '{name}' not found")
-    # Added encoding="utf-8" to prevent UnicodeDecodeError on Windows
     with open(path, encoding="utf-8") as f:
         return json.load(f)
 
@@ -72,12 +61,10 @@ def load_collaboration_guidelines() -> str:
     path = DATA_DIR / "collaboration_guidelines.txt"
     if not path.exists():
         return "Collaboration guidelines not found."
-    # Added encoding="utf-8" to correctly read symbols like '§'
     with open(path, encoding="utf-8") as f:
         return f.read()
 
 
-# ── API Routes ──────────────────────────────────────────────────────
 @app.get("/api/campaigns")
 async def list_scenarios():
     """List available creator-brand collaboration scenarios."""
@@ -134,10 +121,10 @@ async def match_collaboration_stream(request: CollaborationRequest):
 
         async def run_matching():
             try:
-                result = await coordinator.process_claim(
-                    ehr=request.creator_profile,
-                    policy_text=request.brand_guidelines,
-                    plan_name=request.brand_name,
+                result = await coordinator.process_collaboration(
+                    creator_profile=request.creator_profile,
+                    guidelines_text=request.brand_guidelines,
+                    brand_name=request.brand_name,
                 )
                 result_holder["result"] = result
             except Exception as e:
@@ -150,7 +137,7 @@ async def match_collaboration_stream(request: CollaborationRequest):
                     tags=["ERROR"],
                 )
 
-        task = asyncio.create_task(run_matching())
+        asyncio.create_task(run_matching())
 
         # Stream events as they come in
         while True:
@@ -207,48 +194,22 @@ async def match_collaboration_stream(request: CollaborationRequest):
     )
 
 
-@app.post("/api/process-sync")
-async def process_claim_sync(request: ClaimRequest):
-    """Synchronous version — processes and returns complete result."""
-    if not API_KEY:
-        raise HTTPException(500, "OPENROUTER_API_KEY not configured")
-
-    coordinator = ClaimsCoordinator(api_key=API_KEY)
-    try:
-        result = await coordinator.process_claim(
-            ehr=request.ehr_data,
-            policy_text=request.policy_document,
-            plan_name=request.plan_name,
-        )
-        return JSONResponse(content=json.loads(json.dumps(result, default=str)))
-    except Exception as e:
-        raise HTTPException(500, f"Processing error: {str(e)}")
-
-
-# ── Frontend ────────────────────────────────────────────────────────
 @app.get("/")
 async def serve_frontend():
     index_path = STATIC_DIR / "index.html"
     if not index_path.exists():
         return HTMLResponse("<h1>Frontend not found. Ensure static/index.html exists.</h1>")
     
-    # FIX: Added encoding="utf-8" to fix UnicodeDecodeError
-    # This ensures characters like the medical symbol (⚕) are read correctly.
     with open(index_path, encoding="utf-8") as f:
         return HTMLResponse(f.read())
 
 
-# Mount static files (CSS, JS, etc.)
 if STATIC_DIR.exists():
     app.mount("/static", StaticFiles(directory=str(STATIC_DIR)), name="static")
 
 
-# ── Run ─────────────────────────────────────────────────────────────
 if __name__ == "__main__":
     import uvicorn
-    print("╔══════════════════════════════════════════════╗")
-    print("║   Claims & Care Coordinator                 ║")
-    print("║   Multi-Agent Prior Authorization System     ║")
-    print("╚══════════════════════════════════════════════╝")
+    print("Creator Collaboration Coordinator")
     print()
     uvicorn.run(app, host="0.0.0.0", port=8000, log_level="info")
