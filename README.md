@@ -21,8 +21,7 @@
 
 ## 🎬 Demo Video
 
-[![Watch Demo on Loom!](https://img.shields.io/badge/▶%20Watch%20Demo-625DF5?style=for-the-badge&logo=loom&logoColor=white)](https://www.loom.com/share/173f5ce5e2174c2b8d4963585ff8f229)
-
+[![Watch Demo on Loom](https://img.shields.io/badge/▶%20Watch%20Demo-625DF5?style=for-the-badge&logo=loom&logoColor=white)](https://www.loom.com/share/173f5ce5e2174c2b8d4963585ff8f229)
 
 > *Watch the Advisor Agent populate the Collaboration Ledger in real time, then the Match Agent read shared state and produce a structured decision — live.*
 
@@ -213,12 +212,12 @@ sequenceDiagram
     participant C as 🎯 Coordinator
     participant ADV as 🟢 Advisor
     participant MAT as 🔵 Match
-    participant OAI as 🤖 GPT-4
+    participant OAI as 🤖 GPT-4o-mini
 
     B->>F: POST /api/match
     F->>C: orchestrate(request)
     C->>ADV: Phase 1 — analyze creator
-    ADV->>OAI: GPT-4 call
+    ADV->>OAI: GPT-4o-mini call
     OAI-->>ADV: stream tokens
     ADV-->>B: SSE: PROFILE_SCAN_START
     ADV-->>B: SSE: AUDIENCE_ANALYSIS
@@ -229,7 +228,7 @@ sequenceDiagram
 
     C->>MAT: Phase 2 — match to brief
     MAT-->>B: SSE: LEDGER_READ
-    MAT->>OAI: GPT-4 call (ledger + guidelines)
+    MAT->>OAI: GPT-4o-mini call (ledger + guidelines)
     OAI-->>MAT: stream tokens
     MAT-->>B: SSE: REQUIREMENT_MATCH
     MAT-->>B: SSE: PATHWAY_DETERMINATION
@@ -409,7 +408,7 @@ flowchart LR
         B1[FastAPI] --- B2[Pydantic v2] --- B3[asyncio · Python 3.11+]
     end
     subgraph AI["AI Layer"]
-        A1[OpenAI GPT-4] --- A2[Structured prompting]
+        A1[OpenAI GPT-4o-mini] --- A2[Structured prompting]
     end
     subgraph FE["Frontend"]
         F1[Vanilla HTML/JS] --- F2[SSE · No build step]
