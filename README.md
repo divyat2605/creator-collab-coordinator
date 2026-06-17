@@ -21,7 +21,7 @@
 
 ## 🎬 Demo Video
 
-[![Watch Demo on Loom](https://img.shields.io/badge/▶%20Watch%20Demo-625DF5?style=for-the-badge&logo=loom&logoColor=white)](https://www.loom.com/share/173f5ce5e2174c2b8d4963585ff8f229)
+[![Watch Demo on Loom!](https://img.shields.io/badge/▶%20Watch%20Demo-625DF5?style=for-the-badge&logo=loom&logoColor=white)](https://www.loom.com/share/173f5ce5e2174c2b8d4963585ff8f229)
 
 
 > *Watch the Advisor Agent populate the Collaboration Ledger in real time, then the Match Agent read shared state and produce a structured decision — live.*
