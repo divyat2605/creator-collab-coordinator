@@ -1,170 +1,216 @@
-# ⚕ Claims & Care Coordinator
+## ⭐ Creator Collaboration Coordinator
 
-**Multi-Agent Prior Authorization System with Shared Memory**
+**Multi-Agent Brand–Creator Collaboration Platform with Shared Memory**
 
-Two AI agents (Clinical + Policy) collaborate through a shared **Medical Necessity Ledger** to auto-approve insurance prior authorizations in seconds instead of days.
+Two AI agents (Advisor + Match) collaborate through a shared **Collaboration Ledger** to help brands find the right creators, justify decisions, and move from brief to signed collaboration in a fraction of the usual time.
 
 ---
 
-## 🏗 Architecture
+### 🏗 Architecture
 
+```text
+┌───────────────────┐    ┌───────────────────────────────┐    ┌───────────────────┐
+│   Advisor Agent    │───▶│     Collaboration Ledger      │◀───│    Match Agent     │
+│ (creator-centric)  │    │        (Shared Memory)        │    │  (brand-centric)   │
+│ • Reads profiles   │    │ • Thread-safe async store     │    │ • Reads ledger     │
+│ • Scores fit       │    │ • Event-driven subscribers    │    │ • Matches to brief │
+│ • Surfaces risks   │    │ • Query interface             │    │ • Proposes pathway │
+└───────────────────┘    └───────────────────────────────┘    └───────────────────┘
+                                     │
+                                     ▼
+                         ┌────────────────────────┐
+                         │   Match Determination  │
+                         │  MATCHED / CONDITIONAL │
+                         │  / DECLINED / REVIEW   │
+                         └────────────────────────┘
 ```
-┌──────────────────┐     ┌─────────────────────────────┐     ┌──────────────────┐
-│  Clinical Agent   │────▶│  Medical Necessity Ledger   │◀────│  Policy Agent     │
-│                   │     │       (Shared Memory)        │     │                   │
-│ • Extracts EHR    │     │                              │     │ • Reads ledger    │
-│ • Analyzes labs   │     │ • Thread-safe async store    │     │ • Adapts search   │
-│ • Assesses need   │     │ • Event-driven subscribers   │     │ • Finds exceptions│
-│ • Writes context  │     │ • Query interface            │     │ • Determines path │
-└──────────────────┘     └─────────────────────────────┘     └──────────────────┘
-                                      │
-                                      ▼
-                          ┌─────────────────────┐
-                          │  Final Determination │
-                          │  AUTO-APPROVED / etc │
-                          └─────────────────────┘
-```
 
-### The Shared Memory USP
+#### The Shared Memory USP
 
-This isn't two agents working independently. The **Medical Necessity Ledger** is a structured, event-driven shared memory system where:
+This isn’t two agents working independently. The **Collaboration Ledger** is a structured, event-driven shared memory where:
 
-1. **Clinical Agent** analyzes EHR data and writes findings + **policy search hints**
-2. **Policy Agent** reads the ledger and **adapts its behavior** based on what the Clinical Agent found
-3. If the Clinical Agent identifies a rare autoimmune condition, the Policy Agent shifts from generic imaging rules to searching for **autoimmune exception clauses**
+1. **Advisor Agent** analyzes the creator profile and writes structured findings (audience, performance, risk flags, strengths).
+2. **Match Agent** reads the ledger and **adapts its behavior** based on what the Advisor Agent found and what the brand brief requires.
+3. For strong fits, the system can fast‑track decisions; for edge cases, it routes to “PENDING_REVIEW” with a clear audit trail.
 
-This is the core innovation — the agents genuinely collaborate through shared state.
+This is the core innovation — agents genuinely collaborate through shared state instead of passing around opaque text blobs.
 
 ---
 
 ## 🚀 Quick Start
 
 ### Prerequisites
-- Python 3.11+
-- An Anthropic API key ([get one here](https://console.anthropic.com/))
 
-### Setup (< 2 minutes)
+- Python 3.11+
+- An OpenAI API key (`OPENAI_API_KEY`)
+
+### Setup
 
 ```bash
 # 1. Clone / unzip the project
-cd claims-care-coordinator
+cd creator-collab-coordinator
 
 # 2. Create virtual environment
 python -m venv venv
-source venv/bin/activate  # Windows: venv\Scripts\activate
+# Windows
+venv\Scripts\activate
+# macOS / Linux
+source venv/bin/activate
 
 # 3. Install dependencies
 pip install -r requirements.txt
 
 # 4. Set your API key
-export ANTHROPIC_API_KEY=sk-ant-your-key-here  # Linux/Mac
-# set ANTHROPIC_API_KEY=sk-ant-your-key-here    # Windows
+# Windows (PowerShell)
+$env:OPENAI_API_KEY="sk-your-key-here"
+# macOS / Linux
+export OPENAI_API_KEY="sk-your-key-here"
 
-# 5. Run!
+# 5. Run the server
 python main.py
 ```
 
-Open **http://localhost:8000** in your browser.
+Open `http://localhost:8000` in your browser to view the web UI.
 
 ---
 
-## 🎮 Demo Script (for testing)
+## 🎮 Demo Scenarios
 
-### Scenario 1: Lupus (Autoimmune Exception)
-> "Maria Chen has SLE with suspected lupus nephritis. Watch the Clinical Agent extract her abnormal labs — ANA 1:640, low complement, proteinuria — and write them to the shared ledger. Now the Policy Agent reads the ledger and SHIFTS its search from standard imaging rules to Section 7.3 — the Autoimmune Disease Diagnostic Exception. It finds that all four qualifying criteria are met. Result: **AUTO-APPROVED instantly**, bypassing the standard 5-7 day review. That's the shared memory in action."
+The repo ships with two sample creator profiles and a long-form collaboration guideline document:
 
-### Scenario 2: Heart Failure (Multi-Morbidity Fast-Track)  
-> "James Okafor has heart failure with diabetes and CKD. The Clinical Agent flags his BNP at 890 — way above the 400 threshold — and writes a search hint for the Policy Agent: 'look for heart failure expedited pathways and multi-morbidity clauses.' The Policy Agent finds Section 3.1.4 — the Heart Failure Expedited Pathway AND the Multi-Morbidity Fast-Track. Result: **approved in 4 hours** instead of a week."
+- **Fashion Influencer — Sofia Romero**
+  - Sustainable fashion creator on Instagram with ~450K followers and ~8.2% engagement.
+  - Great for brands launching eco-conscious lines or circular fashion drops.
 
-### Key point to emphasize:
-> "The Policy Agent behaves DIFFERENTLY based on what the Clinical Agent wrote. For the lupus case, it searched autoimmune exceptions. For the cardiac case, it searched heart failure pathways. Same agent, different behavior — because of shared memory."
+- **Tech Educator — Marcus Chen**
+  - Tech education creator on YouTube with ~280K subscribers and ~72% average video completion.
+  - Ideal for developer tools, SaaS onboarding, and complex product education.
+
+The **Match Agent** reads the same collaboration guidelines for both creators but behaves differently because the **Advisor Agent** has written different strengths, risks, and audience fit signals into the Collaboration Ledger.
 
 ---
 
 ## 📁 Project Structure
 
-```
-claims-care-coordinator/
-├── main.py                    # FastAPI server + SSE streaming
+```text
+creator-collab-coordinator/
+├── main.py                 # FastAPI server + SSE streaming
 ├── agents/
-│   ├── clinical_agent.py      # EHR analysis with Claude
-│   ├── policy_agent.py        # Policy search with shared context
-│   └── coordinator.py         # Orchestration layer
+│   ├── advisor_agent.py    # Creator-centric Advisor Agent
+│   ├── match_agent.py      # Brand-centric Match Agent (shared context)
+│   └── coordinator.py      # CampaignCoordinator orchestration layer
 ├── memory/
-│   └── ledger.py              # Medical Necessity Ledger (shared memory)
+│   └── ledger.py           # CollaborationLedger (shared memory)
 ├── models/
-│   └── schemas.py             # Pydantic data models
+│   └── schemas.py          # Pydantic data models (CreatorProfile, etc.)
 ├── data/
-│   ├── ehr_lupus.json         # Sample: SLE/Lupus patient
-│   ├── ehr_cardiac.json       # Sample: Heart failure patient
-│   └── sample_policy.txt      # 1000+ word insurance policy
+│   ├── creator_profile_fashion_influencer.json   # Sample: Sofia Romero
+│   ├── creator_profile_tech_educator.json        # Sample: Marcus Chen
+│   └── collaboration_guidelines.txt              # 1000+ word framework
 ├── static/
-│   └── index.html             # Frontend (no build step needed)
+│   └── index.html          # Frontend (no build step needed)
 ├── requirements.txt
 └── README.md
 ```
 
+> Note: Some filenames/classes may still carry legacy names (`policy_agent.py`, etc.) but their role in the new architecture is “Match Agent” / brand-side reasoning.
+
 ---
 
-## 🔧 API Endpoints
+## 🔧 API Surface
 
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| `GET` | `/api/samples` | List available sample scenarios |
-| `GET` | `/api/sample/{id}` | Get sample EHR + policy preview |
-| `POST` | `/api/process` | Process claim with **SSE streaming** |
-| `POST` | `/api/process-sync` | Process claim (synchronous, full result) |
-| `GET` | `/` | Serve frontend |
+### REST Endpoints
 
-### SSE Event Types
+| Method | Endpoint              | Description                                              |
+|--------|-----------------------|----------------------------------------------------------|
+| `GET`  | `/api/campaigns`      | List available sample collaboration scenarios           |
+| `GET`  | `/api/scenario/{id}`  | Get creator profile + full collaboration guidelines     |
+| `GET`  | `/api/guidelines`     | Fetch the full collaboration guidelines text            |
+| `POST` | `/api/match`          | Run Advisor + Match Agents (SSE streaming of ledger)    |
+| `GET`  | `/`                   | Serve the frontend                                       |
 
-The `/api/process` endpoint streams events as Server-Sent Events:
+### Streaming (`/api/match`)
 
-- `SCAN_START` — Clinical Agent begins EHR scan
-- `SYMPTOM_ANALYSIS` — Clinical findings extracted
-- `LAB_ANALYSIS` — Lab results analyzed
-- `NECESSITY_ASSESSMENT` — Medical necessity determined
-- `CLINICAL_CONTEXT_COMPLETE` — Ledger updated for Policy Agent
-- `LEDGER_READ` — Policy Agent reads shared memory
-- `POLICY_SEARCH` — Policy sections found
-- `SECTION_MATCH` — Individual policy section matched
-- `EXCEPTION_ANALYSIS` — Exception clauses evaluated
-- `PATHWAY_DETERMINATION` — Authorization pathway decided
-- `PROCESS_COMPLETE` — Final determination
+`/api/match` streams events as **Server-Sent Events** (SSE). The frontend subscribes and renders entries in real time from the Collaboration Ledger.
+
+Common event types include:
+
+- `PROFILE_ANALYSIS` — Advisor Agent analyzing creator profile.
+- `FIT_SCORING` — Advisor Agent writing structured fit metrics to the ledger.
+- `LEDGER_READ` — Match Agent reading shared memory.
+- `REQUIREMENT_MATCH` — Match Agent matching brand requirements to creator signals.
+- `SECTION_MATCH` — Specific collaboration guideline sections cited.
+- `PATHWAY_DETERMINATION` — Final match pathway proposed.
+- `PROCESS_COMPLETE` — Overall result (MATCHED / CONDITIONAL / DECLINED / PENDING_REVIEW).
+
+Each event includes:
+
+- `source` — `advisor`, `match`, `ledger`, or `system`.
+- `event_type` — structured event name.
+- `message` — human-readable summary for the UI.
+- `data` — structured payload, suitable for programmatic consumption.
 
 ---
 
 ## 🧪 Custom Data
 
-You can use your own EHR data and policy documents:
+You can also use your own creator profiles and brand guidelines.
 
-1. **Via the UI**: Click "Upload EHR (JSON)" and "Upload Policy (TXT)" on the landing page
-2. **Via API**: POST to `/api/process` with your own `ClaimRequest` payload
+### Via the UI
 
-EHR JSON format matches the samples in `data/ehr_*.json`.
+On the landing page:
+
+1. **Upload Creator Profile (JSON)** — matches the `CreatorProfile` schema.
+2. **Upload Brand Guidelines (TXT/PDF)** — long-form copy describing tiers, constraints, and fast-track rules.
+
+The UI will send these as a `CollaborationRequest` into `/api/match` and stream the Advisor/Match interaction, just like the samples.
+
+### Via the API
+
+POST directly to `/api/match` with a JSON body that matches `CollaborationRequest`:
+
+```json
+{
+  "creator_profile": {
+    "creator_name": "Example Creator",
+    "creator_follower_count": 120000,
+    "creator_primary_platform": "TikTok",
+    "creator_specialty": "Beauty tutorials",
+    "...": "other CreatorProfile fields"
+  },
+  "brand_guidelines": "Full text of your collaboration framework...",
+  "brand_name": "Your Brand",
+  "brand_id": "INTERNAL-ID-123"
+}
+```
 
 ---
 
 ## 💡 Technical Highlights
 
-- **Real AI agents** — Claude Sonnet powers both agents with domain-specific system prompts
-- **True shared memory** — Thread-safe async ledger with event subscribers, not just message passing
-- **Adaptive behavior** — Policy Agent's search strategy changes based on Clinical Agent's output
-- **SSE streaming** — Watch agent collaboration in real-time, not just the final result
-- **Structured output** — Agents produce typed JSON for reliable downstream processing
-- **Production patterns** — Pydantic schemas, async/await, proper error handling
+- **Multi-agent orchestration** — Advisor + Match Agents coordinated by a `CampaignCoordinator`.
+- **True shared memory** — `CollaborationLedger` is a thread-safe async store with subscribers, not just ad-hoc globals.
+- **Structured reasoning** — Both agents write structured events (`LedgerEntry`) with `source`, `tags`, `severity`, and typed `data`.
+- **SSE streaming UI** — The frontend renders ledger events in real time, making the agent reasoning legible to humans.
+- **Modern Python stack** — FastAPI, Pydantic models, async/await, and OpenAI’s Python client (`>=1.0.0,<2.0.0`).
 
 ---
 
-## 📊 Business Case
+## 📊 Why This Matters for Brands
 
-| Metric | Traditional | With Claims & Care | Improvement |
-|--------|------------|-------------------|-------------|
-| Processing Time | 5-7 business days | Seconds to hours | **96% faster** |
-| Denial Rate | ~15-20% | ~9-12% | **40% reduction** |
-| Admin Cost / Claim | $3,000-5,000 | $200-500 | **$2,700+ saved** |
-| Appeal Rate | ~8% of claims | ~2% of claims | **75% fewer** |
+Traditional creator selection is:
+
+- Spreadsheet-heavy
+- Opaque (“someone decided this in a meeting”)
+- Hard to audit after the fact
+
+With the Creator Collaboration Coordinator:
+
+- **Faster** — briefs can move from idea to recommended creators in minutes.
+- **Safer** — values alignment, brand safety, and performance history are explicit in the ledger.
+- **More explainable** — every match, conditional approval, or decline carries a structured rationale.
+- **More scalable** — the same playbook can be reused and tuned across markets and teams.
 
 ---
 
-Built for the hackathon. Built to ship.
+Built for brand and creator teams who want AI to *explain* its decisions—not just generate another list of names.```json

@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Claims & Care Coordinator</title>
+<title>Creator Collaboration Coordinator</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Outfit:wght@300;400;600;700;800&display=swap" rel="stylesheet">
 <style>
@@ -70,9 +70,9 @@
   .panels { display: grid; grid-template-columns: 300px 1fr 300px; gap: 16px; min-height: calc(100vh - 120px); }
   .panel { background: var(--surface); border-radius: 14px; border: 1px solid var(--border); padding: 20px; overflow-y: auto; max-height: calc(100vh - 120px); }
   .panel-title { font-size: 10px; font-weight: 700; letter-spacing: 0.12em; margin-bottom: 16px; font-family: var(--font-mono); }
-  .panel-title.clinical { color: var(--green); }
+  .panel-title.advisor { color: var(--green); }
   .panel-title.ledger { color: var(--amber); }
-  .panel-title.policy { color: var(--purple); }
+  .panel-title.match { color: var(--purple); }
 
   .patient-name { font-size: 18px; font-weight: 700; font-family: var(--font-display); }
   .patient-complaint { font-size: 12px; color: var(--text-muted); margin-top: 4px; }
@@ -102,25 +102,25 @@
   #ledger-panel.glowing { border-color: var(--amber-border); animation: glow 2s ease-in-out infinite; }
 
   .live-badge { font-size: 9px; padding: 2px 8px; border-radius: 4px; animation: pulse 2s ease infinite; margin-left: 8px; display: none; }
-  .live-badge.clinical { background: #22c55e18; color: var(--green); }
-  .live-badge.policy { background: #818cf818; color: var(--purple); }
+  .live-badge.advisor { background: #22c55e18; color: var(--green); }
+  .live-badge.match { background: #818cf818; color: var(--purple); }
 
   .ledger-entry { padding: 14px 16px; border-radius: 10px; margin-bottom: 10px; animation: slideUp 0.4s ease-out; }
-  .ledger-entry.clinical { background: var(--green-bg); border: 1px solid var(--green-border); }
-  .ledger-entry.policy { background: var(--purple-bg); border: 1px solid var(--purple-border); }
+  .ledger-entry.advisor { background: var(--green-bg); border: 1px solid var(--green-border); }
+  .ledger-entry.match { background: var(--purple-bg); border: 1px solid var(--purple-border); }
   .ledger-entry.ledger, .ledger-entry.system { background: var(--amber-bg); border: 1px solid var(--amber-border); }
 
   .entry-header { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
   .entry-source { font-size: 10px; font-weight: 700; letter-spacing: 0.08em; font-family: var(--font-mono); }
-  .entry-source.clinical { color: var(--green); }
-  .entry-source.policy { color: var(--purple); }
+  .entry-source.advisor { color: var(--green); }
+  .entry-source.match { color: var(--purple); }
   .entry-source.ledger, .entry-source.system { color: var(--amber); }
   .entry-time { font-size: 10px; color: #666; font-family: var(--font-mono); }
   .entry-message { font-size: 13.5px; color: #e0e0e0; line-height: 1.55; }
   .entry-tags { display: flex; gap: 6px; margin-top: 8px; flex-wrap: wrap; }
   .entry-tag { font-size: 10px; padding: 3px 8px; border-radius: 4px; font-family: var(--font-mono); font-weight: 600; }
-  .entry-tag.clinical { background: #22c55e18; color: var(--green); }
-  .entry-tag.policy { background: #818cf818; color: var(--purple); }
+  .entry-tag.advisor { background: #22c55e18; color: var(--green); }
+  .entry-tag.match { background: #818cf818; color: var(--purple); }
   .entry-tag.ledger, .entry-tag.system { background: #f59e0b18; color: var(--amber); }
 
   .loading-bar { height: 3px; border-radius: 2px; margin-top: 10px; background: linear-gradient(90deg, transparent, var(--purple), transparent); background-size: 200% 100%; animation: shimmer 1.5s ease-in-out infinite; }
@@ -192,16 +192,16 @@
 <div class="landing" id="landing">
   <div class="glow-orb"></div>
   <div class="brand">
-    <div class="brand-icon">⚕</div>
-    <span class="brand-label">CLAIMS & CARE COORDINATOR</span>
+    <div class="brand-icon">★</div>
+    <span class="brand-label">CREATOR COLLABORATION COORDINATOR</span>
   </div>
   <!-- <h1>
     <span>Two AI Agents.</span><br>
     <span class="gradient">One Shared Brain.</span>
   </h1> -->
   <p class="subtitle">
-    Watch a Clinical Agent and Policy Agent collaborate through a shared 
-    Medical Necessity Ledger to auto-approve prior authorizations in seconds — not days.
+    Watch an Advisor Agent and Match Agent collaborate through a shared 
+    Collaboration Ledger to pair brands with the right creators—fast, transparently, and at scale.
   </p>
   <div class="scenarios" id="scenarios"></div>
 
@@ -209,20 +209,20 @@
     <div class="upload-or">— or upload your own data —</div>
     <div class="upload-row">
       <label class="upload-btn">
-        📋 Upload EHR (JSON)
+        📋 Upload Creator Profile (JSON)
         <input type="file" id="ehr-upload" accept=".json">
       </label>
       <label class="upload-btn">
-        📄 Upload Policy (TXT/PDF)
+        📄 Upload Brand Guidelines (TXT/PDF)
         <input type="file" id="policy-upload" accept=".txt,.pdf">
       </label>
     </div>
   </div>
 
   <div class="stats-bar">
-    <div class="stat"><div class="stat-val" style="color: var(--green)">40%</div><div class="stat-label">Avg. Denial Reduction</div></div>
-    <div class="stat"><div class="stat-val" style="color: var(--purple)">96%</div><div class="stat-label">Processing Time Saved</div></div>
-    <div class="stat"><div class="stat-val" style="color: var(--amber)">$2.7K</div><div class="stat-label">Admin Savings / Case</div></div>
+    <div class="stat"><div class="stat-val" style="color: var(--green)">8.2%</div><div class="stat-label">Avg. Engagement (Sample Creator)</div></div>
+    <div class="stat"><div class="stat-val" style="color: var(--purple)">72%</div><div class="stat-label">Avg. Video Completion (Sample Creator)</div></div>
+    <div class="stat"><div class="stat-val" style="color: var(--amber)">3×</div><div class="stat-label">Faster Brief-to-Match Workflows</div></div>
   </div>
 </div>
 
@@ -231,18 +231,18 @@
   <!-- Header -->
   <div class="header">
     <div class="header-left">
-      <div class="header-icon">⚕</div>
-      <span class="header-title">CLAIMS & CARE</span>
+      <div class="header-icon">★</div>
+      <span class="header-title">CREATOR COLLABORATION</span>
     </div>
     <div style="display:flex; align-items:center; gap:12px;">
       <div class="status-dots">
         <div class="status-dot">
-          <div class="dot" id="dot-clinical"></div>
-          <span class="dot-label" id="label-clinical">Clinical</span>
+          <div class="dot" id="dot-advisor"></div>
+          <span class="dot-label" id="label-advisor">Advisor</span>
         </div>
         <div class="status-dot">
-          <div class="dot" id="dot-policy"></div>
-          <span class="dot-label" id="label-policy">Policy</span>
+          <div class="dot" id="dot-match"></div>
+          <span class="dot-label" id="label-match">Match</span>
         </div>
       </div>
       <button class="back-btn" onclick="showLanding()">← Back</button>
@@ -250,28 +250,28 @@
   </div>
 
   <div class="panels">
-    <!-- LEFT: Clinical Agent / EHR -->
-    <div class="panel" id="ehr-panel">
-      <div class="panel-title clinical">⬤ CLINICAL AGENT — EHR DATA</div>
-      <div id="ehr-content"></div>
+    <!-- LEFT: Advisor Agent / Creator Profile -->
+    <div class="panel" id="creator-panel">
+      <div class="panel-title advisor">⬤ ADVISOR AGENT — CREATOR PROFILE</div>
+      <div id="creator-content"></div>
     </div>
 
     <!-- CENTER: Ledger -->
     <div class="panel" id="ledger-panel">
       <div class="panel-title ledger" style="display:flex;align-items:center;">
-        ✦ MEDICAL NECESSITY LEDGER — SHARED MEMORY
-        <span class="live-badge clinical" id="live-badge">LIVE</span>
+        ✦ COLLABORATION LEDGER — SHARED MEMORY
+        <span class="live-badge advisor" id="live-badge">LIVE</span>
       </div>
       <div id="ledger-entries"></div>
       <div class="outcome" id="outcome"></div>
     </div>
 
-    <!-- RIGHT: Policy Agent -->
-    <div class="panel" id="policy-panel">
-      <div class="panel-title policy">⬤ POLICY AGENT — INSURANCE DATA</div>
-      <div id="policy-content">
+    <!-- RIGHT: Match Agent -->
+    <div class="panel" id="match-panel">
+      <div class="panel-title match">⬤ MATCH AGENT — BRAND REQUIREMENTS</div>
+      <div id="match-content">
         <div style="color:#555; font-size:12px; font-family:var(--font-mono);">
-          Waiting for Clinical Agent to write to shared ledger...
+          Waiting for Advisor Agent to write to shared ledger...
         </div>
       </div>
     </div>
@@ -295,12 +295,12 @@ const API_BASE = window.location.origin;
 // ─── Init ─────────────────────────────────────────────────────────
 async function init() {
   try {
-    const resp = await fetch(`${API_BASE}/api/samples`);
+    const resp = await fetch(`${API_BASE}/api/campaigns`);
     const data = await resp.json();
-    samples = data.samples;
+    samples = data.scenarios;
     renderScenarios();
   } catch(e) {
-    console.error('Failed to load samples:', e);
+    console.error('Failed to load scenarios:', e);
     document.getElementById('scenarios').innerHTML = 
       '<p style="color:var(--red);font-size:13px;">⚠ Cannot connect to backend. Make sure the server is running on port 8000.</p>';
   }
@@ -311,8 +311,8 @@ function renderScenarios() {
   container.innerHTML = samples.map((s, i) => `
     <button class="scenario-btn" onclick="runScenario('${s.id}')" id="btn-${s.id}">
       <div class="label">SCENARIO ${i+1}</div>
-      <div class="name">${s.patient_name}</div>
-      <div class="desc">${s.chief_complaint}</div>
+      <div class="name">${s.creator_name}</div>
+      <div class="desc">${s.creator_specialty}</div>
     </button>
   `).join('');
 }
@@ -329,7 +329,7 @@ document.getElementById('ehr-upload')?.addEventListener('change', async (e) => {
     e.target.closest('.upload-btn').textContent = `✓ ${file.name}`;
     checkCustomUpload();
   } catch(err) {
-    alert('Invalid JSON file. Please upload a valid EHR JSON.');
+    alert('Invalid JSON file. Please upload a valid creator profile JSON.');
   }
 });
 
@@ -354,12 +354,12 @@ async function runCustom() {
   document.getElementById('landing').style.display = 'none';
   document.getElementById('main').style.display = 'block';
   
-  renderEHRPanel(uploadedEHR);
+  renderCreatorPanel(uploadedEHR);
   startProcess({
-    ehr_data: uploadedEHR,
-    policy_document: uploadedPolicy,
-    plan_name: "Custom Policy",
-    member_id: "CUSTOM-001",
+    creator_profile: uploadedEHR,
+    brand_guidelines: uploadedPolicy,
+    brand_name: "Custom Brand",
+    brand_id: "CUSTOM-001",
   });
 }
 
@@ -368,45 +368,40 @@ async function runScenario(id) {
   if (isProcessing) return;
   currentScenario = id;
 
-  // Load sample data
-  const resp = await fetch(`${API_BASE}/api/sample/${id}`);
+  // Load scenario data
+  const resp = await fetch(`${API_BASE}/api/scenario/${id}`);
   const data = await resp.json();
   
-  // Load full policy
-  const policyResp = await fetch(`${API_BASE}/api/sample/${id}`);
-  const policyData = await policyResp.json();
+  const policyData = data;
 
   document.getElementById('landing').style.display = 'none';
   document.getElementById('main').style.display = 'block';
 
-  renderEHRPanel(data.ehr);
+  renderCreatorPanel(data.creator_profile);
   renderScenarioSwitcher();
 
-  // Fetch full policy text for the request
-  const fullPolicyResp = await fetch(`${API_BASE}/api/samples`);
-  
   startProcess({
-    ehr_data: data.ehr,
-    policy_document: await loadFullPolicy(),
-    plan_name: "ACME Health Insurance Platinum PPO",
-    member_id: "ACME-" + Math.random().toString(36).substr(2, 7).toUpperCase(),
+    creator_profile: data.creator_profile,
+    brand_guidelines: data.guidelines_text,
+    brand_name: "Sample Brand Campaign",
+    brand_id: "BRAND-" + Math.random().toString(36).substr(2, 7).toUpperCase(),
   });
 }
 
 async function loadFullPolicy() {
   try {
-    const resp = await fetch(`${API_BASE}/api/policy`);
+    const resp = await fetch(`${API_BASE}/api/guidelines`);
     if (resp.ok) {
       const data = await resp.json();
       return data.text;
     }
   } catch(e) {}
-  // Fallback
+  // Fallback: use first scenario's guidelines
   const id = currentScenario || (samples[0]?.id);
-  if (!id) return "Policy document not available";
-  const resp = await fetch(`${API_BASE}/api/sample/${id}`);
+  if (!id) return "Brand guidelines not available";
+  const resp = await fetch(`${API_BASE}/api/scenario/${id}`);
   const data = await resp.json();
-  return data.policy_text || "Policy document not available";
+  return data.guidelines_text || "Brand guidelines not available";
 }
 
 // ─── Process Claim via SSE ────────────────────────────────────────
@@ -424,7 +419,7 @@ async function startProcess(payload) {
   setPhase('idle');
 
   try {
-    const response = await fetch(`${API_BASE}/api/process`, {
+    const response = await fetch(`${API_BASE}/api/match`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload),
@@ -479,9 +474,9 @@ function handleSSEEvent(event) {
   // Add to ledger
   addLedgerEntry(event);
 
-  // Update policy panel on policy events
-  if (event.source === 'policy' && event.event_type === 'SECTION_MATCH') {
-    addPolicyMatch(event);
+  // Update match panel on match events
+  if (event.source === 'match' && event.event_type === 'SECTION_MATCH') {
+    addMatchSection(event);
   }
 
   // Show outcome on completion
@@ -491,38 +486,38 @@ function handleSSEEvent(event) {
 }
 
 function setPhase(phase) {
-  const dotClinical = document.getElementById('dot-clinical');
-  const dotPolicy = document.getElementById('dot-policy');
-  const labelClinical = document.getElementById('label-clinical');
-  const labelPolicy = document.getElementById('label-policy');
+  const dotAdvisor = document.getElementById('dot-advisor');
+  const dotMatch = document.getElementById('dot-match');
+  const labelAdvisor = document.getElementById('label-advisor');
+  const labelMatch = document.getElementById('label-match');
   const badge = document.getElementById('live-badge');
   const ledgerPanel = document.getElementById('ledger-panel');
 
-  dotClinical.className = 'dot';
-  dotPolicy.className = 'dot';
-  labelClinical.style.color = 'var(--text-dim)';
-  labelPolicy.style.color = 'var(--text-dim)';
+  dotAdvisor.className = 'dot';
+  dotMatch.className = 'dot';
+  labelAdvisor.style.color = 'var(--text-dim)';
+  labelMatch.style.color = 'var(--text-dim)';
   badge.style.display = 'none';
   ledgerPanel.classList.remove('glowing');
 
-  if (phase === 'clinical') {
-    dotClinical.className = 'dot active';
-    dotClinical.style.background = 'var(--green)';
-    labelClinical.style.color = 'var(--green)';
-    badge.className = 'live-badge clinical';
+  if (phase === 'advisor') {
+    dotAdvisor.className = 'dot active';
+    dotAdvisor.style.background = 'var(--green)';
+    labelAdvisor.style.color = 'var(--green)';
+    badge.className = 'live-badge advisor';
     badge.style.display = 'inline';
     ledgerPanel.classList.add('glowing');
-  } else if (phase === 'policy') {
-    dotPolicy.className = 'dot active';
-    dotPolicy.style.background = 'var(--purple)';
-    labelPolicy.style.color = 'var(--purple)';
-    badge.className = 'live-badge policy';
+  } else if (phase === 'match') {
+    dotMatch.className = 'dot active';
+    dotMatch.style.background = 'var(--purple)';
+    labelMatch.style.color = 'var(--purple)';
+    badge.className = 'live-badge match';
     badge.style.display = 'inline';
   } else if (phase === 'resolution') {
-    dotClinical.style.background = 'var(--green)';
-    dotPolicy.style.background = 'var(--purple)';
-    labelClinical.style.color = 'var(--green)';
-    labelPolicy.style.color = 'var(--purple)';
+    dotAdvisor.style.background = 'var(--green)';
+    dotMatch.style.background = 'var(--purple)';
+    labelAdvisor.style.color = 'var(--green)';
+    labelMatch.style.color = 'var(--purple)';
   }
 }
 
@@ -538,7 +533,7 @@ function getElapsedTime() {
 function addLedgerEntry(event) {
   const container = document.getElementById('ledger-entries');
   const source = event.source || 'system';
-  const sourceLabels = { clinical: 'CLINICAL AGENT', policy: 'POLICY AGENT', ledger: 'SHARED LEDGER', system: 'SYSTEM' };
+  const sourceLabels = { advisor: 'ADVISOR AGENT', match: 'MATCH AGENT', ledger: 'COLLABORATION LEDGER', system: 'SYSTEM' };
 
   const entry = document.createElement('div');
   entry.className = `ledger-entry ${source}`;
@@ -562,8 +557,8 @@ function addLedgerEntry(event) {
   container.scrollTop = container.scrollHeight;
 }
 
-function addPolicyMatch(event) {
-  const container = document.getElementById('policy-content');
+function addMatchSection(event) {
+  const container = document.getElementById('match-content');
   
   // Remove "waiting" message
   if (container.querySelector('div[style]')) {
@@ -571,13 +566,13 @@ function addPolicyMatch(event) {
   }
 
   const section = document.createElement('div');
-  const isException = event.data?.is_exception;
-  section.className = `policy-section ${isException ? 'matched' : ''}`;
+  const isFlexible = event.data?.is_flexible;
+  section.className = `policy-section ${isFlexible ? 'matched' : ''}`;
 
   section.innerHTML = `
     <div style="display:flex;align-items:center;">
       <span class="policy-section-id">§${escapeHtml(event.data?.section_id || '?')}</span>
-      ${isException ? '<span class="policy-match-badge">EXCEPTION</span>' : ''}
+      ${isFlexible ? '<span class="policy-match-badge">FLEXIBLE</span>' : ''}
       ${event.data?.relevance_score ? `<span style="margin-left:auto;font-size:10px;color:var(--purple);font-family:var(--font-mono);">${Math.round(event.data.relevance_score * 100)}% match</span>` : ''}
     </div>
     <div class="policy-text">${escapeHtml(event.data?.text_preview || event.message)}</div>
@@ -591,7 +586,7 @@ function showOutcome(data) {
   
   if (!det) return;
 
-  const status = det.status || det.expected_status || 'PENDING';
+  const status = det.status || det.expected_status || 'PENDING_REVIEW';
   const statusClass = status.includes('APPROVED') ? '' : status.includes('DENIED') ? 'denied' : 'pending';
   const statusIcon = status.includes('APPROVED') ? '✓' : status.includes('DENIED') ? '✗' : '⏳';
 
@@ -607,10 +602,10 @@ function showOutcome(data) {
         <span class="outcome-status">${status}</span>
       </div>
       <div class="outcome-grid">
-        <div><div class="outcome-item-label">PATHWAY</div><div class="outcome-item-value">${escapeHtml(det.pathway || det.recommended_pathway || 'Standard Review')}</div></div>
+        <div><div class="outcome-item-label">MATCH PATHWAY</div><div class="outcome-item-value">${escapeHtml(det.match_pathway || det.recommended_pathway || 'Standard Review')}</div></div>
         <div><div class="outcome-item-label">PROCESSING TIME</div><div class="outcome-item-value">${escapeHtml(det.estimated_processing_time || 'N/A')}</div></div>
         <div><div class="outcome-item-label">CONFIDENCE</div><div class="outcome-item-value">${det.confidence_score ? Math.round(det.confidence_score * 100) + '%' : 'N/A'}</div></div>
-        <div><div class="outcome-item-label">ADMIN SAVINGS</div><div class="outcome-item-value">${escapeHtml(det.admin_cost_savings || 'N/A')}</div></div>
+        <div><div class="outcome-item-label">ESTIMATED REACH</div><div class="outcome-item-value">${escapeHtml(det.expected_reach || 'N/A')}</div></div>
       </div>
     </div>
   `;
@@ -618,51 +613,51 @@ function showOutcome(data) {
 }
 
 // ─── Render EHR Panel ────────────────────────────────────────────
-function renderEHRPanel(ehr) {
-  const container = document.getElementById('ehr-content');
+function renderCreatorPanel(profile) {
+  const container = document.getElementById('creator-content');
   
-  const symptomsHTML = (ehr.symptoms || []).map(s => 
-    `<span class="tag green">${escapeHtml(typeof s === 'string' ? s : s.name || s)}</span>`
+  const expertiseHTML = (profile.expertise_areas || []).map(s => 
+    `<span class="tag green">${escapeHtml(typeof s === 'string' ? s : s.description || s)}</span>`
   ).join('');
 
-  const labsHTML = (ehr.labs || []).map(lab => {
-    const flag = lab.flag || 'normal';
+  const metricsHTML = (profile.social_metrics || []).map(metric => {
+    const flag = metric.flag || 'normal';
     return `<div class="lab-row">
-      <span class="lab-name">${escapeHtml(lab.name)}</span>
-      <span class="lab-value ${flag}">${escapeHtml(lab.value)}${lab.unit ? ' ' + escapeHtml(lab.unit) : ''}</span>
+      <span class="lab-name">${escapeHtml(metric.name)}</span>
+      <span class="lab-value ${flag}">${escapeHtml(metric.value)}${metric.unit ? ' ' + escapeHtml(metric.unit) : ''}</span>
     </div>`;
   }).join('');
 
-  const dxHTML = (ehr.diagnosis_codes || []).map(dx => `
+  const audienceHTML = (profile.audience_demographics || []).map(dx => `
     <div style="margin-bottom:8px;">
-      <span class="dx-code">${escapeHtml(dx.code)}</span>
-      <div class="dx-desc">${escapeHtml(dx.description)}</div>
+      <span class="dx-code">${escapeHtml(dx)}</span>
+      <div class="dx-desc"></div>
     </div>
   `).join('');
 
-  const proc = ehr.requested_procedure;
+  const proc = profile.proposed_deliverables;
   const procHTML = proc ? `
     <div class="procedure-box">
-      <div class="section-label">REQUESTED PROCEDURE</div>
+      <div class="section-label">PROPOSED DELIVERABLE</div>
       <div class="procedure-name">${escapeHtml(proc.name)}</div>
-      <div class="procedure-detail">${escapeHtml(proc.code)} (${escapeHtml(proc.system || 'CPT')}) — ${escapeHtml(proc.reason)}</div>
+      <div class="procedure-detail">${escapeHtml(proc.category || '')} — ${escapeHtml(proc.brand_objective || '')}</div>
     </div>` : '';
 
   container.innerHTML = `
     <div style="margin-bottom:20px;">
-      <div class="patient-name">${escapeHtml(ehr.patient_name)}, ${ehr.patient_age}${escapeHtml(ehr.patient_sex)}</div>
-      <div class="patient-complaint">${escapeHtml(ehr.chief_complaint)}</div>
+      <div class="patient-name">${escapeHtml(profile.creator_name)}</div>
+      <div class="patient-complaint">${escapeHtml(profile.creator_specialty)}</div>
     </div>
-    <div class="section-label" style="margin-top:0">SYMPTOMS</div>
-    <div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:16px;">${symptomsHTML}</div>
-    <div class="section-label">LAB RESULTS</div>
-    ${labsHTML}
-    <div class="section-label">DIAGNOSIS CODES</div>
-    ${dxHTML}
+    <div class="section-label" style="margin-top:0">EXPERTISE AREAS</div>
+    <div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:16px;">${expertiseHTML}</div>
+    <div class="section-label">SOCIAL METRICS</div>
+    ${metricsHTML}
+    <div class="section-label">AUDIENCE NOTES</div>
+    ${audienceHTML}
     ${procHTML}
-    ${ehr.prior_treatments?.length ? `
-      <div class="section-label">PRIOR TREATMENTS</div>
-      ${ehr.prior_treatments.map(t => `<div style="font-size:11px;color:#777;margin-bottom:4px;">• ${escapeHtml(t)}</div>`).join('')}
+    ${profile.previous_collaborations?.length ? `
+      <div class="section-label">PREVIOUS COLLABORATIONS</div>
+      ${profile.previous_collaborations.map(t => `<div style="font-size:11px;color:#777;margin-bottom:4px;">• ${escapeHtml(t)}</div>`).join('')}
     ` : ''}
   `;
 }
@@ -672,7 +667,7 @@ function renderScenarioSwitcher() {
   container.innerHTML = samples.map((s, i) => `
     <button class="switch-btn ${s.id === currentScenario ? 'active' : ''}" 
             onclick="runScenario('${s.id}')" ${isProcessing ? 'disabled' : ''}>
-      Scenario ${i+1}: ${s.patient_name.split(',')[0]}
+      Scenario ${i+1}: ${s.creator_name.split(',')[0]}
     </button>
   `).join('');
 }
