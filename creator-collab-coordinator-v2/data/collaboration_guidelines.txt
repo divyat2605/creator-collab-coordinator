@@ -1,0 +1,282 @@
+BRAND–CREATOR COLLABORATION FRAMEWORK
+====================================
+
+This framework is a practical, opinionated guide for how brands and creators
+work together inside the Collaboration Ledger. It replaces insurance “policy”
+language with campaign-ready guidelines that are still structured, explicit,
+and machine-readable.
+
+The goal is simple:
+
+    Make it obvious when a collaboration is a GREAT fit,
+    when it should be fast-tracked,
+    and when it needs a human in the loop.
+
+The Collaboration Ledger turns these guidelines into structured events so that
+the Advisor Agent, Match Agent, and Campaign Coordinator can reason about
+brand risk, creator fit, expected performance, and operational effort.
+
+----------------------------------------------------------------------
+SECTION 1 — CREATOR TIERS
+----------------------------------------------------------------------
+
+Creators are grouped into standardized tiers based on audience size and
+baseline engagement. These tiers are descriptive, not prescriptive; they help
+brands align budgets, expectations, and required review rigor.
+
+Tier A — Emerging Specialists
+-----------------------------
+- Audience: 10K–100K followers / subscribers
+- Typical engagement: 5–12%
+- Positioning: Deeply trusted within a niche, high community intimacy
+- Strengths:
+  - High comment quality and direct creator replies
+  - Flexibility to experiment with new formats
+  - Efficient cost per engaged viewer
+- Best used for:
+  - Early product validation
+  - High-signal feedback loops
+  - Seeding stories, Reels, shorts, or live sessions
+
+Tier B — Established Voices
+---------------------------
+- Audience: 100K–500K followers / subscribers
+- Typical engagement: 3–8%
+- Positioning: Recognized authority with consistent reach and repeat viewers
+- Strengths:
+  - Reliable traffic to key messages and landing pages
+  - Strong storytelling and narrative arcs across content
+  - Suitable for campaign anchors and hero pieces
+- Best used for:
+  - Product launches
+  - Brand repositioning moments
+  - Educational explainers that must travel beyond the core community
+
+Tier C — Flagship Partners
+--------------------------
+- Audience: 500K+ followers / subscribers
+- Typical engagement: 2–5%
+- Positioning: Category-defining voices with cross-platform visibility
+- Strengths:
+  - Major reach and social proof
+  - Ability to normalize new behaviors or categories at scale
+  - High leverage for distribution of brand narratives
+- Best used for:
+  - Tentpole campaigns
+  - New market entry
+  - Competitive repositioning with clear “category story”
+
+The Collaboration Ledger stores creator tier, engagement baselines, and past
+campaign performance so that the Match Agent can reason about fit relative to
+brand goals and risk appetite.
+
+----------------------------------------------------------------------
+SECTION 2 — ENGAGEMENT THRESHOLDS AND QUALITY SIGNALS
+----------------------------------------------------------------------
+
+The Advisor Agent and Match Agent never look at a single vanity metric in
+isolation. Instead, they evaluate a bundle of signals that together indicate
+whether a creator is likely to deliver meaningful outcomes for a specific
+campaign.
+
+Core quantitative thresholds
+----------------------------
+- Baseline engagement:
+  - Tier A: 5%+ average engagement on recent sponsored and organic posts
+  - Tier B: 4%+ on recent content, 3%+ on sponsored posts
+  - Tier C: 3%+ on recent content, 2%+ on sponsored posts
+- Completion or watch time:
+  - Long-form video (10+ minutes): 50%+ typical completion, 65%+ considered
+    strong
+  - Short-form video (< 90 seconds): 65%+ typical completion, 75%+ considered
+    strong
+- Returning viewer / repeat viewer share:
+  - 40%+ returning viewers over 90 days indicates a loyal, habit-driven
+    audience, suitable for complex or educational products.
+
+Qualitative engagement quality
+------------------------------
+- High quality comments:
+  - Questions about how to use the product category
+  - Screenshots or photos of viewers trying recommendations
+  - Context-rich feedback (“this solved X for my team”, “I finally understood Y”)
+- Low quality comments:
+  - “First”, “🔥🔥🔥”, generic emojis with no content
+  - Bots or unrelated spam threads
+  - Disconnected meme chains not anchored to the topic
+
+The Collaboration Ledger records both quantitative thresholds and qualitative
+examples so that the Match Agent can explain WHY a collaboration meets or
+fails guidelines, not just whether it passes.
+
+----------------------------------------------------------------------
+SECTION 3 — BRAND SAFETY AND VALUE ALIGNMENT
+----------------------------------------------------------------------
+
+This section replaces traditional “exclusion criteria” from insurance with
+clear guidelines about brand safety, ethical standards, and values fit.
+
+Baseline guidelines
+-------------------
+- No active involvement in hate, harassment, or dehumanizing content.
+- No promotion of illegal products or services.
+- No persistent pattern of misinformation in the creator’s primary domain.
+- Compliance with platform policies and local advertising regulations.
+
+Values and positioning fit
+--------------------------
+- Sustainability claims:
+  - Creators discussing sustainability should demonstrate basic literacy about
+    certifications, materials, or lifecycle impact.
+  - The brand must avoid asking creators to overstate or misrepresent
+    sustainability attributes.
+- Equity and representation:
+  - Collaborations in sensitive categories (health, finance, employment,
+    education) should reflect diverse identities and avoid tokenism.
+  - Creators should have a documented track record of speaking about these
+    topics respectfully and thoughtfully.
+
+The Advisor Agent highlights possible misalignments early, while the Match
+Agent uses this context to either fast-track approval or require human review.
+
+----------------------------------------------------------------------
+SECTION 4 — FAST-TRACK COLLABORATION CLAUSES
+----------------------------------------------------------------------
+
+Certain combinations of creator profile, past performance, and campaign type
+qualify for fast-track approval. These function like “exception clauses” in
+the previous insurance domain, but now they are positive signals that allow
+the system to move faster with confidence.
+
+Fast-Track Clause 4.1 — Returning Partner With Proven Performance
+-----------------------------------------------------------------
+Conditions:
+- The creator has completed at least 2 prior campaigns with the brand.
+- Post-campaign surveys or metrics show that agreed KPIs were met or exceeded.
+- No major brand safety incidents or contract disputes occurred.
+
+Effect:
+- Skip manual review for standard campaign briefs of similar size and scope.
+- Auto-approve within the Collaboration Ledger, with a note that the decision
+  relies on historical performance.
+
+Fast-Track Clause 4.2 — High-Engagement Niche Educator
+------------------------------------------------------
+Conditions:
+- Tier A or Tier B creator with 6%+ average engagement in the last 90 days.
+- Content is primarily educational or “how-to” within the brand’s category.
+- Audience questions in comments align closely with brand’s ideal customer
+  profile.
+
+Effect:
+- For education-led campaigns (tutorials, explainers, deep dives), the Match
+  Agent may auto-approve with pre-defined guardrails:
+  - Required disclosure language
+  - Required links to documentation or help centers
+  - Optional human review for scripts exceeding a specified budget threshold
+
+Fast-Track Clause 4.3 — Safety-Conscious Sustainability Advocates
+-----------------------------------------------------------------
+Conditions:
+- Creator works primarily in sustainability, climate, or ethical consumption.
+- Past content shows a documented pattern of calling out greenwashing.
+- Brand claims are verifiable and mapped to third-party standards or audits.
+
+Effect:
+- Campaigns focused on sustainable lines, recycled materials, or circular
+  programs can be accelerated, with the Advisor Agent explicitly checking that
+  all sustainability statements are backed by citations from the brand.
+
+----------------------------------------------------------------------
+SECTION 5 — MATCHING LOGIC AND PATHWAYS
+----------------------------------------------------------------------
+
+The Campaign Coordinator and Match Agent translate campaign intent and creator
+profile into a clear pathway outcome. Outcomes are intentionally simple:
+
+- MATCHED — strong fit, low risk, proceed as proposed.
+- CONDITIONAL MATCH — promising fit, but requires adjustments or safeguards.
+- DECLINED — not an appropriate fit based on current guidelines.
+- PENDING REVIEW — requires human involvement (e.g., edge cases or new
+  markets).
+
+Key decision dimensions
+-----------------------
+- Audience fit:
+  - Does the creator reach the audience segments the brand cares about?
+  - Do the audience’s behaviors match the campaign’s call-to-action?
+- Content format fit:
+  - Does the creator habitually ship the formats proposed (e.g., Reels, shorts,
+    carousels, live streams, long-form)?
+  - Are there clear examples of similar content performing well?
+- Brand safety and values:
+  - Any red flags in past content?
+  - Any historical conflicts with similar brands or categories?
+- Operational complexity:
+  - Number of deliverables and platforms involved.
+  - Need for legal review, regulatory review, or product approvals.
+
+The Collaboration Ledger stores each of these decision factors as structured
+fields so that humans can later audit why a match was made.
+
+----------------------------------------------------------------------
+SECTION 6 — HUMAN-IN-THE-LOOP SAFEGUARDS
+----------------------------------------------------------------------
+
+Not every collaboration should be automated. The framework explicitly defines
+which scenarios MUST route to human review.
+
+Requires human review if:
+-------------------------
+- The creator or brand is operating in a heavily regulated space (healthcare,
+  finance, employment, or education with high-stakes outcomes).
+- The campaign involves sensitive topics such as mental health, identity,
+  politics, or major life decisions.
+- The Match Agent detects inconsistencies between brand claims and third-party
+  evidence surfaced by the Advisor Agent.
+- The requested content format or timeline is unprecedented for this creator.
+
+In these cases, the Collaboration Ledger records:
+- What triggered the “PENDING REVIEW” status
+- Which clauses or thresholds were partially met or violated
+- Suggested questions or checks for the human reviewer
+
+----------------------------------------------------------------------
+SECTION 7 — MEASUREMENT, FEEDBACK, AND ITERATION
+----------------------------------------------------------------------
+
+The framework assumes every collaboration generates feedback that should shape
+future matches.
+
+Post-campaign data to log
+-------------------------
+- Reach and impressions across platforms
+- Engagement rate compared to creator’s baseline
+- Click-through, sign-up, purchase, or other downstream metrics
+- Qualitative feedback from both brand and creator
+- Any brand safety or alignment issues
+
+The Collaboration Ledger allows the Advisor Agent to use this history as
+context for future recommendations, and the Match Agent can:
+- Automatically downgrade or upgrade creators within tiers.
+- Tighten or relax fast-track clauses for specific categories.
+- Suggest new collaboration patterns (e.g., converting a one-off into a
+  recurring series if performance was outsized).
+
+----------------------------------------------------------------------
+SECTION 8 — SUMMARY
+----------------------------------------------------------------------
+
+This collaboration framework encodes the rules that human partnership,
+marketing, and legal teams already use every day—but in a way that is explicit
+enough for AI agents to reason about.
+
+Instead of asking, “Is this creator good?”, the system asks:
+- “Good for which campaign?”
+- “Under what constraints?”
+- “With which safety nets?”
+
+The result is a brand–creator matching workflow that is faster, safer, and
+more transparent than ad-hoc, spreadsheet-driven decision making—without
+removing humans from the loop where they matter most.
+

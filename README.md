@@ -42,7 +42,9 @@
 - 📒 **Collaboration Ledger** — typed, timestamped, queryable shared state with event-driven subscribers
 - 📡 **Live SSE streaming** — agent reasoning rendered in real time in the browser; no polling, no refresh
 - 🔍 **Fully auditable decisions** — every match, conditional approval, or decline carries a structured rationale
-- ⚡ **Production-inspired async orchestration** — `CampaignCoordinator` phases agents, handles retries, aggregates results
+- ⚡ **Production-inspired async orchestration** — `CampaignCoordinator` phases agents sequentially (each phase reads the previous one's ledger state), while independent sub-steps *within* a phase — audience vs. metrics analysis, guideline-chunk scanning — run concurrently via `asyncio.gather`
+- 🔁 **Real retry logic** — every LLM call goes through a shared helper (`agents/llm_utils.py`) with exponential backoff on rate limits/timeouts/5xx, not just a try/except that gives up
+- ✅ **Tested** — `pytest` suite covering the ledger, JSON-repair/retry logic, and a full mocked end-to-end pipeline run that pins down the exact backend↔frontend field contract
 - 🔌 **Zero-retraining iteration** — update brand guidelines as a TXT/PDF; no model fine-tuning required
 
 ---
@@ -74,13 +76,33 @@ python -m venv venv
 source venv/bin/activate          # macOS / Linux
 venv\Scripts\activate             # Windows PowerShell
 
-# Install and run
+# Install
 pip install -r requirements.txt
+
+# Configure your API key — either export it directly...
 export OPENAI_API_KEY="sk-your-key-here"   # or $env: on Windows
+# ...or copy .env.example to .env and fill it in (auto-loaded on startup)
+cp .env.example .env
+
 python main.py
 ```
 
-Open **`http://localhost:8000`**
+Open **`http://localhost:8000`**. Check `http://localhost:8000/healthz` any time to confirm the server is up and the API key is configured.
+
+### 🧪 Testing
+
+```bash
+pytest
+```
+
+25 tests covering the `CollaborationLedger` (writes, subscriptions, queries,
+context cache), the shared `llm_utils` JSON-repair and retry logic (including
+a test that injects rate-limit errors and asserts the backoff-then-recover
+path), and a full mocked end-to-end `/api/match` run — that last one is a
+regression test for the exact field names the frontend reads off the final
+determination, so a backend/frontend contract drift fails CI instead of
+showing up as a silently broken outcome panel in the browser. No real OpenAI
+calls are made; a fake client routes each prompt to a scripted JSON response.
 
 ---
 
@@ -205,6 +227,11 @@ graph TD
 
 ### SSE Streaming Pipeline
 
+Each LLM call is a single (non-streamed) completion — what's actually
+streamed live to the browser is the *ledger event*, the moment each agent
+writes a structured finding. Independent sub-steps fan out concurrently
+instead of awaiting one call at a time:
+
 ```mermaid
 sequenceDiagram
     participant B as 🌐 Browser
@@ -215,25 +242,37 @@ sequenceDiagram
     participant OAI as 🤖 GPT-4o-mini
 
     B->>F: POST /api/match
-    F->>C: orchestrate(request)
+    F->>C: process_collaboration(request)
     C->>ADV: Phase 1 — analyze creator
-    ADV->>OAI: GPT-4o-mini call
-    OAI-->>ADV: stream tokens
     ADV-->>B: SSE: PROFILE_SCAN_START
-    ADV-->>B: SSE: AUDIENCE_ANALYSIS
-    ADV-->>B: SSE: METRICS_ANALYSIS
-    ADV-->>B: SSE: FIT_ASSESSMENT
+    par concurrent sub-analyses
+        ADV->>OAI: audience analysis
+    and
+        ADV->>OAI: metrics analysis
+    end
+    ADV-->>B: SSE: AUDIENCE_ANALYSIS, METRICS_ANALYSIS
+    ADV->>OAI: fit assessment (needs both results above)
+    ADV-->>B: SSE: FIT_ASSESSMENT, ADVISOR_CONTEXT_COMPLETE
 
     Note over ADV,MAT: Ledger populated with Advisor findings
 
     C->>MAT: Phase 2 — match to brief
     MAT-->>B: SSE: LEDGER_READ
-    MAT->>OAI: GPT-4o-mini call (ledger + guidelines)
-    OAI-->>MAT: stream tokens
-    MAT-->>B: SSE: REQUIREMENT_MATCH
-    MAT-->>B: SSE: PATHWAY_DETERMINATION
-    MAT-->>B: SSE: PROCESS_COMPLETE
+    par concurrent guideline-chunk scan (bounded by a semaphore)
+        MAT->>OAI: scan chunk 1
+    and
+        MAT->>OAI: scan chunk N
+    end
+    MAT-->>B: SSE: GUIDELINE_SCAN, SECTION_MATCH
+    MAT->>OAI: flexibility analysis, then pathway determination
+    MAT-->>B: SSE: FLEXIBILITY_ANALYSIS, MATCH_PATHWAY_DETERMINATION
+    C->>OAI: final determination call
+    C-->>B: SSE: FINAL_DETERMINATION, PROCESS_COMPLETE + result
 ```
+
+Any call in the diagram above that fails transiently (rate limit, timeout,
+5xx) is retried with exponential backoff before falling back to a safe
+default — see `agents/llm_utils.py`.
 
 ### Shared Ledger vs. Message Passing
 
@@ -274,9 +313,9 @@ flowchart TD
     D3 -->|alternative| A3[Redis]
     S3 --> R3["Zero infra for demos — Redis-swappable for prod"]
 
-    D4{"LLM Calls"} -->|chosen| S4[Sequential]
-    D4 -->|alternative| A4[Parallel]
-    S4 --> R4["Match depends on Advisor output — parallel defeats shared memory"]
+    D4{"LLM Calls"} -->|chosen| S4["Sequential across phases,\nparallel within a phase"]
+    D4 -->|alternative| A4["Fully parallel"]
+    S4 --> R4["Match needs Advisor's ledger output, so phases stay sequential —\nbut independent calls inside a phase (audience+metrics, guideline chunks)\nfan out concurrently via asyncio.gather"]
 
     style S1 fill:#0f3460,stroke:#e94560,color:#fff
     style S2 fill:#0f3460,stroke:#e94560,color:#fff
@@ -298,36 +337,42 @@ flowchart TD
 
 ## 💡 Technical Highlights
 
-**1. True Shared Memory**
+**1. True Shared Memory** — `memory/ledger.py`
 ```python
 class CollaborationLedger:
-    async def write(self, entry: LedgerEntry):
+    async def write(self, source, event_type, message, data=None, tags=None, severity=...) -> LedgerEntry:
+        entry = LedgerEntry(id=..., timestamp=..., source=source, event_type=event_type,
+                             message=message, data=data or {}, tags=tags or [], severity=severity)
         async with self._lock:
             self._entries.append(entry)
-            await self._notify_subscribers(entry)   # event-driven
+            for queue in self._subscribers:          # event-driven: SSE consumers
+                await queue.put(entry)                # get notified immediately
+        return entry
 
-    async def query(self, event_type=None, tags=None):
-        return [e for e in self._entries if matches(e, event_type, tags)]
+    async def read_by_event_type(self, event_type) -> list[LedgerEntry]:
+        async with self._lock:
+            return [e for e in self._entries if e.event_type == event_type]
 ```
 
-**2. Structured Agent Reasoning**
+**2. Structured Agent Reasoning** — `agents/advisor_agent.py`
 ```python
-await ledger.write(LedgerEntry(
-    source="advisor",
+await self.ledger.write(
+    source=AgentSource.ADVISOR,
     event_type="FIT_ASSESSMENT",
-    tags=["STRONG_FIT", "sustainability", "fast-track-eligible"],
-    severity="high",
-    data={"fit_score": 0.91, "risk_flags": [], "fast_track_eligible": True}
-))
+    message=f"Fit assessment: {necessity_level}. {justification}",
+    data=result,  # {necessity_assessment, brand_search_hints, flexibility_indicators, ...}
+    tags=["FIT_ASSESSMENT", necessity_level],     # e.g. "STRONG_FIT"
+    severity=Severity.HIGH,
+)
 ```
 
-**3. Match Agent Adapts to Ledger State**
+**3. Match Agent Adapts to Ledger State** — `agents/match_agent.py`
 ```python
-fit_entries = await ledger.query(event_type="FIT_ASSESSMENT")
-if fit_entries[0].data.get("fast_track_eligible"):
-    # → PATHWAY: FAST_TRACK
-else:
-    # → PATHWAY: PENDING_REVIEW with flagged concerns
+fit_level = await self.ledger.get_context("fit_level")               # set by Advisor
+search_hints = await self.ledger.get_context("brand_search_hints")   # set by Advisor
+# ... guideline chunks are scanned with those hints baked into the prompt,
+# so the Match Agent searches differently depending on what the Advisor found —
+# not a static keyword search re-run on every profile.
 ```
 
 ---
@@ -338,6 +383,7 @@ else:
 
 | Method | Endpoint | Description |
 |---|---|---|
+| `GET` | `/healthz` | Liveness probe + config check |
 | `GET` | `/api/campaigns` | List demo scenarios |
 | `GET` | `/api/scenario/{id}` | Creator profile + guidelines |
 | `POST` | `/api/match` | **Run agents** — SSE stream |
@@ -347,10 +393,11 @@ else:
 
 ```mermaid
 flowchart LR
-    E1[PROFILE_SCAN_START] --> E2[AUDIENCE_ANALYSIS] --> E3[METRICS_ANALYSIS]
-    E3 --> E4[FIT_ASSESSMENT] --> E5[RISK_FLAGS]
-    E5 --> E6[LEDGER_READ] --> E7[REQUIREMENT_MATCH]
-    E7 --> E8[SECTION_MATCH] --> E9[PATHWAY_DETERMINATION] --> E10[PROCESS_COMPLETE]
+    E1[PROFILE_SCAN_START] --> E2["AUDIENCE_ANALYSIS +\nMETRICS_ANALYSIS (concurrent)"]
+    E2 --> E3[FIT_ASSESSMENT] --> E4[LEDGER_READ]
+    E4 --> E5["GUIDELINE_SCAN\n(chunks scanned concurrently)"] --> E6[SECTION_MATCH]
+    E6 --> E7[FLEXIBILITY_ANALYSIS] --> E8[MATCH_PATHWAY_DETERMINATION]
+    E8 --> E9[FINAL_DETERMINATION] --> E10[PROCESS_COMPLETE]
 
     style E1 fill:#1b4332,stroke:#40916c,color:#fff
     style E10 fill:#0f3460,stroke:#e94560,color:#fff
@@ -360,17 +407,18 @@ Each event is a typed `LedgerEntry`:
 
 ```typescript
 interface LedgerEntry {
+  id:         string
   source:     "advisor" | "match" | "ledger" | "system"
   event_type: string
   message:    string                  // human-readable
   data:       Record<string, any>     // structured payload
-  timestamp:  number
-  severity?:  "low" | "medium" | "high"
-  tags?:      string[]
+  timestamp:  string                  // ISO 8601, UTC
+  severity:   "normal" | "high" | "critical"
+  tags:       string[]
 }
 ```
 
-> 📄 Full API examples and custom payload schema → [`docs/API.md`](docs/API.md)
+> 📄 Full API examples and custom payload schema → [`docs/api.md`](docs/api.md)
 
 ---
 
@@ -380,9 +428,10 @@ interface LedgerEntry {
 creator-collab-coordinator/
 ├── main.py                       # FastAPI server + SSE streaming
 ├── agents/
-│   ├── advisor_agent.py          # Creator-centric analysis → writes to Ledger
-│   ├── match_agent.py            # Brand-centric matching → reads from Ledger
-│   └── coordinator.py            # CampaignCoordinator orchestration
+│   ├── advisor_agent.py          # Creator-centric analysis → writes to Ledger (concurrent sub-steps)
+│   ├── match_agent.py            # Brand-centric matching → reads from Ledger (concurrent chunk scan)
+│   ├── coordinator.py            # CampaignCoordinator orchestration (sequential phases)
+│   └── llm_utils.py              # Shared JSON-repair + retry/backoff wrapper for all LLM calls
 ├── memory/
 │   └── ledger.py                 # CollaborationLedger — shared async memory
 ├── models/
@@ -393,9 +442,16 @@ creator-collab-coordinator/
 │   └── collaboration_guidelines.txt
 ├── static/
 │   └── index.html                # Frontend — no build step
+├── tests/
+│   ├── test_ledger.py            # CollaborationLedger unit tests
+│   ├── test_llm_utils.py         # JSON-repair + retry/backoff tests
+│   ├── test_api.py               # Full mocked end-to-end pipeline + endpoint tests
+│   └── fake_openai.py            # Scripted fake OpenAI client used by the tests above
+├── pytest.ini
+├── .env.example                  # Copy to .env to auto-load OPENAI_API_KEY
 ├── assets/                       # Screenshots + demo video
 └── docs/
-    └── API.md                    # Full API reference + custom payload examples
+    └── api.md                    # Full API reference + custom payload examples
 ```
 
 ---
@@ -408,7 +464,7 @@ flowchart LR
         B1[FastAPI] --- B2[Pydantic v2] --- B3[asyncio · Python 3.11+]
     end
     subgraph AI["AI Layer"]
-        A1[OpenAI GPT-4o-mini] --- A2[Structured prompting]
+        A1[OpenAI GPT-4o-mini] --- A2[Structured prompting + retry/backoff]
     end
     subgraph FE["Frontend"]
         F1[Vanilla HTML/JS] --- F2[SSE · No build step]
@@ -416,9 +472,13 @@ flowchart LR
     subgraph MEM["Memory"]
         M1[CollaborationLedger] --- M2[Redis-swappable]
     end
+    subgraph TEST["Testing"]
+        T1[pytest] --- T2[Fake OpenAI client · no network calls]
+    end
     BE <--> AI
     BE <--> FE
     BE <--> MEM
+    TEST -.-> BE
 ```
 
 ---
